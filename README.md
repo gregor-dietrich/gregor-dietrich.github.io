@@ -49,7 +49,16 @@ The theme is a git submodule in `themes/PaperMod`. If you cloned without
 
 ```sh
 hugo new content posts/my-essay.md   # creates a draft from archetypes/default.md
-hugo server -D                       # preview at http://localhost:1313, drafts included
+scripts/dev.sh                       # preview at http://localhost:1313, drafts included
+```
+
+`scripts/dev.sh` runs in the foreground; Ctrl+C stops it. To keep your terminal
+free instead:
+
+```sh
+scripts/dev.sh --detach   # start in the background
+scripts/dev.sh --status   # is it running, and on which URL?
+scripts/dev.sh --stop     # stop it
 ```
 
 Posts are plain Markdown in `content/posts/` with front matter:
