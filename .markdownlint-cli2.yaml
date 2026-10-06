@@ -1,0 +1,8 @@
+config:
+  # Prose paragraphs are written one line each; wrapping is the renderer's job.
+  MD013: false
+globs:
+  - "**/*.md"
+gitignore: true
+ignores:
+  - themes/**

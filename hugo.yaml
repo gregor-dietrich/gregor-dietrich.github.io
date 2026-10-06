@@ -4,6 +4,8 @@ title: Gregor Dietrich
 theme: PaperMod
 
 enableRobotsTXT: true
+# Broken {{< ref >}} / {{< relref >}} links fail the build instead of warning.
+refLinksErrorLevel: ERROR
 buildDrafts: false
 buildFuture: false
 
