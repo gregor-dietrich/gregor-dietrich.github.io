@@ -7,44 +7,54 @@ on:
     # Don't use '**.md' — posts are Markdown too.
     paths-ignore:
       - README.md
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Let an in-progress deploy finish; skip runs queued in between.
+# One run per branch or PR at a time. A new push to a PR cancels its stale
+# run; on main, an in-progress deploy finishes and newer runs queue behind it.
 concurrency:
-  group: pages
-  cancel-in-progress: false
-
-defaults:
-  run:
-    shell: bash
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  # The quality gate: nothing deploys unless it passes. PRs run only this job.
+  lint:
     runs-on: ubuntu-latest
-    env:
-      HUGO_VERSION: 0.167.0
     steps:
-      - name: Install Hugo
-        run: |
-          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb
-          sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+        with:
+          linters: "true"
+      - name: Lint
+        run: scripts/lint.sh
+
+  build:
+    needs: lint
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6
       - name: Build
         env:
           HUGO_ENVIRONMENT: production
-        run: hugo --gc --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: hugo --gc --minify --baseURL "$BASE_URL/"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
@@ -53,6 +63,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -2,3 +2,7 @@
 /resources/_gen/
 /.hugo_build.lock
 .DS_Store
+
+# Vale packages are downloaded by `vale sync`; only our own config is tracked.
+/.vale/styles/*
+!/.vale/styles/config/

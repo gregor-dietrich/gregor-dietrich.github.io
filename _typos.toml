@@ -1,0 +1,3 @@
+[files]
+# .gitignore'd paths are skipped already; the theme is a submodule, not ours.
+extend-exclude = ["themes/"]

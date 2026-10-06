@@ -1,0 +1,48 @@
+name: Check external links
+
+# External links are checked here, weekly, rather than in the deploy gate, so
+# another site's outage never blocks publishing. Broken links open (or update)
+# one issue instead of failing silently in the Actions tab.
+on:
+  schedule:
+    - cron: "23 6 * * 1" # Mondays, 06:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+        with:
+          linters: "true"
+      - name: Check links
+        id: lychee
+        env:
+          # Avoids GitHub's rate limit on links to github.com.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          status=0
+          scripts/check-site.sh --external --format markdown --output "$RUNNER_TEMP/links.md" || status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+      - name: Report broken links
+        if: steps.lychee.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Broken external links
+        run: |
+          number="$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number // empty')"
+          if [[ -n "$number" ]]; then
+            gh issue comment "$number" --body-file "$RUNNER_TEMP/links.md"
+          else
+            gh issue create --title "$TITLE" --body-file "$RUNNER_TEMP/links.md"
+          fi
+          exit 1
