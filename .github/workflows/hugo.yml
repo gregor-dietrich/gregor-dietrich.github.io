@@ -3,6 +3,10 @@ name: Deploy Hugo site to Pages
 on:
   push:
     branches: [main]
+    # Denylist, not an allowlist: anything not listed here still deploys.
+    # Don't use '**.md' — posts are Markdown too.
+    paths-ignore:
+      - README.md
   workflow_dispatch:
 
 permissions:
