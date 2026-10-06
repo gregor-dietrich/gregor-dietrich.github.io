@@ -113,8 +113,10 @@ It runs in three places:
 - `scripts/check-site.sh` tolerates two PaperMod deprecation warnings
   ([hugo-PaperMod#1856](https://github.com/adityatelange/hugo-PaperMod/issues/1856));
   remove `KNOWN_WARNINGS` there once a theme update fixes them
-- The favicons in `static/` are placeholders; replace them with your own,
-  keeping the file names
+- The favicons in `static/` are 👨🏻‍💻 (man technologist: light skin tone) from
+  [Noto Emoji](https://github.com/googlefonts/noto-emoji)'s 2D set, licensed
+  under Apache 2.0 (`licenses/noto-emoji.txt`). To change them, replace the
+  files and keep the names; PaperMod links all five.
 
 ## Setting it up from scratch
 
